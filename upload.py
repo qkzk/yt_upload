@@ -21,6 +21,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from utils import format_title
 from utils import read_description
 from utils import get_authenticated_service
+from utils import CLIENT_SECRETS_FILE
+from utils import SCOPES
+from utils import TOKEN_VIDEO_FILE
+
 
 
 # Explicitly tell the underlying HTTP transport library not to retry, since
@@ -50,16 +54,13 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 #   https://developers.google.com/youtube/v3/guides/authentication
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-CLIENT_SECRETS_FILE = 'tokens/client_secret_785506707104-1ov3mff32p12b0dm7um4k4tcfic382cs.apps.googleusercontent.com.json'
 
 # This OAuth 2.0 access scope allows an application to upload files to the
 # authenticated user's YouTube channel, but doesn't allow other types of access.
-SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
 # API_SERVICE_NAME = 'youtube'
 # API_VERSION = 'v3'
 
 # VALID_PRIVACY_STATUSES = ('public', 'private', 'unlisted')
-TOKEN_FILE = 'tokens/upload_video_token.pickle'
 
 
 class Video:
@@ -196,7 +197,7 @@ def upload_video(title):
     video = Video.from_title(title)
 
     # youtube = get_authenticated_service()
-    youtube = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_FILE, SCOPES)
+    youtube = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_VIDEO_FILE, SCOPES)
 
     try:
         # response = initialize_upload(youtube, args)

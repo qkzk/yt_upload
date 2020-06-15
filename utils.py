@@ -11,6 +11,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 API_SERVICE_NAME = 'youtube'
 API_VERSION = 'v3'
 
+CLIENT_SECRETS_FILE = "tokens/client_secret_785506707104-1ov3mff32p12b0dm7um4k4tcfic382cs.apps.googleusercontent.com.json"
+SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
+
+TOKEN_PLAYLIST_FILE = 'tokens/upload_playlist_token.pickle'
+TOKEN_VIDEO_FILE = 'tokens/upload_video_token.pickle'
 
 def read_playlist_name(dirpath):
     return dirpath.split('/')[-1].replace('_', ' ')

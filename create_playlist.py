@@ -1,16 +1,13 @@
 # std lib
 import os
-import sys
+# import sys
 
 # own
 from utils import read_playlist_name
 from utils import get_authenticated_service
-
-
-CLIENT_SECRETS_FILE = "tokens/client_secret_785506707104-1ov3mff32p12b0dm7um4k4tcfic382cs.apps.googleusercontent.com.json"
-SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
-
-TOKEN_FILE = 'tokens/upload_playlist_token.pickle'
+from utils import CLIENT_SECRETS_FILE
+from utils import SCOPES
+from utils import TOKEN_PLAYLIST_FILE
 
 
 def remove_empty_kwargs(**kwargs):
@@ -49,23 +46,26 @@ def playlists_insert(dirpath, client, **kwargs):
     return response
 
 
-def create_playlist():
+def create_playlist(directory):
     # nom de la playlist
-    if len(sys.argv) == 1:
-        dirpath = os.getcwd()
-    else:
-        dirpath = sys.argv[1]
+    # if len(sys.argv) == 1:
+        # dirpath = os.getcwd()
+    # else:
+        # dirpath = sys.argv[1]
 
     # créer le client
-    client = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_FILE, SCOPES)
+    client = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_PLAYLIST_FILE, SCOPES)
 
     # créer une playlist vide ?
-    response = playlists_insert(dirpath,
+    response = playlists_insert(directory,
                                 client,
                                 part='snippet,status',
                                 onBehalfOfContentOwner='')
 
-    response
+    id_playlist = response['id']
+    # uploader chaque vidéo en lui donnant la bonne id
+
+    return id_playlist
 
 if __name__ == '__main__':
-    create_playlist()
+    create_playlist(os.getcwd())
