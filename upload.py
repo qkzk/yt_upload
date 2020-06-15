@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # std lib
-import argparse
+# import argparse
 import http.client
 import httplib2
 import os
@@ -20,6 +20,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # own
 from utils import format_title
 from utils import read_description
+from utils import get_authenticated_service
+
 
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
@@ -48,67 +50,107 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 #   https://developers.google.com/youtube/v3/guides/authentication
 # For more information about the client_secrets.json file format, see:
 #   https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-CLIENT_SECRETS_FILE = 'client_secret_785506707104-1ov3mff32p12b0dm7um4k4tcfic382cs.apps.googleusercontent.com.json'
+CLIENT_SECRETS_FILE = 'tokens/client_secret_785506707104-1ov3mff32p12b0dm7um4k4tcfic382cs.apps.googleusercontent.com.json'
 
 # This OAuth 2.0 access scope allows an application to upload files to the
 # authenticated user's YouTube channel, but doesn't allow other types of access.
 SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-API_SERVICE_NAME = 'youtube'
-API_VERSION = 'v3'
+# API_SERVICE_NAME = 'youtube'
+# API_VERSION = 'v3'
 
-VALID_PRIVACY_STATUSES = ('public', 'private', 'unlisted')
+# VALID_PRIVACY_STATUSES = ('public', 'private', 'unlisted')
+TOKEN_FILE = 'tokens/upload_video_token.pickle'
+
+
+class Video:
+    def __init__(self, title, description, keywords, category, privacyStatus,
+                 selfDeclaredMadeForKids, embeddable, publicStatsViewable):
+
+        self.title = title
+        self.description = description
+        self.keywords = keywords
+        self.category = category
+        self.privacyStatus = privacyStatus
+        self.selfDeclaredMadeForKids = selfDeclaredMadeForKids
+        self.embeddable = embeddable
+        self.publicStatsViewable = publicStatsViewable
+
+        self.response = None
+
+    def initialize_upload(self, youtube):
+        tags = None
+        if self.keywords:
+            tags = self.keywords.split(',')
+
+        # args.title = format_title(args.file)
+        # args.description = read_description(args.description, args.file)
+
+        body = dict(
+            snippet=dict(
+                title=self.title,
+                description=self.description,
+                tags=tags,
+                categoryId=self.category
+            ),
+            status=dict(
+                privacyStatus=self.privacyStatus,
+                selfDeclaredMadeForKids=self.selfDeclaredMadeForKids,
+                embeddable=self.embeddable,
+                publicStatsViewable=self.publicStatsViewable,
+            )
+        )
+
+        # Call the API's videos.insert method to create and upload the video.
+        insert_request = youtube.videos().insert(
+            part=','.join(list(body.keys())),
+            body=body,
+            # The chunksize parameter specifies the size of each chunk of data, in
+            # bytes, that will be uploaded at a time. Set a higher value for
+            # reliable connections as fewer chunks lead to faster uploads. Set a lower
+            # value for better recovery on less reliable connections.
+            #
+            # Setting 'chunksize' equal to -1 in the code below means that the entire
+            # file will be uploaded in a single HTTP request. (If the upload fails,
+            # it will still be retried where it left off.) This is usually a best
+            # practice, but if you're using Python older than 2.6 or if you're
+            # running on App Engine, you should set the chunksize to something like
+            # 1024 * 1024 (1 megabyte).
+            media_body=MediaFileUpload(self.title, chunksize=-1, resumable=True)
+        )
+
+        self.response = resumable_upload(insert_request)
+        return self.response
+
+    @classmethod
+    def from_title(cls, title):
+
+        description = read_description('', title)
+
+        keywords = ''
+        category = '27'
+        privacyStatus = 'unlisted'
+        selfDeclaredMadeForKids = False
+        embeddable = False
+        publicStatsViewable = False
+
+        return cls(title,
+                   description,
+                   keywords,
+                   category,
+                   privacyStatus,
+                   selfDeclaredMadeForKids,
+                   embeddable,
+                   publicStatsViewable)
 
 
 # Authorize the request and store authorization credentials.
-def get_authenticated_service():
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-    credentials = flow.run_console()
-    return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
-def initialize_upload(youtube, options):
-    tags = None
-    if options.keywords:
-        tags = options.keywords.split(',')
+# def get_authenticated_service():
+#     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+#     credentials = flow.run_console()
+#     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
-    args.title = format_title(args.file)
-    args.description = read_description(args.description, args.file)
-
-    body = dict(
-        snippet=dict(
-            title=options.title,
-            description=options.description,
-            tags=tags,
-            categoryId=options.category
-        ),
-        status=dict(
-            privacyStatus=options.privacyStatus,
-            selfDeclaredMadeForKids=False,
-            embeddable=False,
-            publicStatsViewable=False,
-        )
-    )
-
-    # Call the API's videos.insert method to create and upload the video.
-    insert_request = youtube.videos().insert(
-        part=','.join(list(body.keys())),
-        body=body,
-        # The chunksize parameter specifies the size of each chunk of data, in
-        # bytes, that will be uploaded at a time. Set a higher value for
-        # reliable connections as fewer chunks lead to faster uploads. Set a lower
-        # value for better recovery on less reliable connections.
-        #
-        # Setting 'chunksize' equal to -1 in the code below means that the entire
-        # file will be uploaded in a single HTTP request. (If the upload fails,
-        # it will still be retried where it left off.) This is usually a best
-        # practice, but if you're using Python older than 2.6 or if you're
-        # running on App Engine, you should set the chunksize to something like
-        # 1024 * 1024 (1 megabyte).
-        media_body=MediaFileUpload(options.file, chunksize=-1, resumable=True)
-    )
-
-    response = resumable_upload(insert_request)
-    return response
 
 # This method implements an exponential backoff strategy to resume a
 # failed upload.
@@ -150,24 +192,20 @@ def resumable_upload(request):
     return response
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--file', required=True, help='Video file to upload')
-    parser.add_argument('--title', help='Video title', default='Test Title')
-    parser.add_argument('--description', help='Video description',
-                        default='Test Description')
-    parser.add_argument('--category', default='27',
-                        help='Numeric video category. ' +
-                        'See https://developers.google.com/youtube/v3/docs/videoCategories/list')
-    parser.add_argument('--keywords', help='Video keywords, comma separated',
-                        default='')
-    parser.add_argument('--privacyStatus', choices=VALID_PRIVACY_STATUSES,
-                        default='unlisted', help='Video privacy status.')
-    args = parser.parse_args()
+def upload_video(title):
+    video = Video.from_title(title)
 
-    youtube = get_authenticated_service()
+    # youtube = get_authenticated_service()
+    youtube = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_FILE, SCOPES)
 
     try:
-        response = initialize_upload(youtube, args)
+        # response = initialize_upload(youtube, args)
+        response = video.initialize_upload(youtube)
+        return response, video
     except HttpError as e:
         print(('An HTTP error %d occurred:\n%s' % (e.resp.status, e.content)))
+        return None, None
+
+
+if __name__ == '__main__':
+    response, video = upload_video("/mnt/nfs/media/Capture/aero_complexes_exo_p1_1.mkv")

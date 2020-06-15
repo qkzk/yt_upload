@@ -23,10 +23,14 @@ avec mes paramètres par défaut
 - [x]  connect
 - [x]  retrieve
 - [x]  upload
-- [ ]  upload with full description
+- [x]  upload with full description -- impossible de bloquer les comments
 - [ ]  upload batch to playlist
+       - [ ]   create playlist
+       - [ ]   upload whole folder
+       - [ ]   add each video to playlist
 - [ ]  organiser le tout dans un beau truc
 
 ## Sources
 
 [video category list](https://gist.github.com/dgp/1b24bf2961521bd75d6c)
+[gfg upload](https://www.geeksforgeeks.org/youtube-data-api-playlist-set-2/)
