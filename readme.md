@@ -8,8 +8,8 @@ avec mes paramètres par défaut
 
 ## Paramètres à définir
 
-- [ ] title: string
-- [ ] description: string
+- [x] title: string
+- [x] description: string
 - [x] audience: not made for kids
 - [x] catégorie: 27 (éducation)
 - [ ] **comments: disabled** IMPOSSIBLE
@@ -24,11 +24,12 @@ avec mes paramètres par défaut
 - [x]  retrieve
 - [x]  upload
 - [x]  upload with full description -- impossible de bloquer les comments
-- [ ]  upload batch to playlist
-       - [ ]   create playlist
-       - [ ]   upload whole folder
-       - [ ]   add each video to playlist
+- [x]  upload batch to playlist
+   - [x]   create playlist
+   - [x]   upload whole folder
+   - [x]   add each video to playlist
 - [ ]  organiser le tout dans un beau truc
+- [ ]  tester
 
 ## Sources
 
