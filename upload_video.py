@@ -26,7 +26,6 @@ from utils import SCOPES
 from utils import TOKEN_VIDEO_FILE
 
 
-
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
 httplib2.RETRIES = 1
@@ -35,10 +34,15 @@ httplib2.RETRIES = 1
 MAX_RETRIES = 10
 
 # Always retry when these exceptions are raised.
-RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, http.client.NotConnected,
-                        http.client.IncompleteRead, http.client.ImproperConnectionState,
-                        http.client.CannotSendRequest, http.client.CannotSendHeader,
-                        http.client.ResponseNotReady, http.client.BadStatusLine)
+RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error,
+                        IOError,
+                        http.client.NotConnected,
+                        http.client.IncompleteRead,
+                        http.client.ImproperConnectionState,
+                        http.client.CannotSendRequest,
+                        http.client.CannotSendHeader,
+                        http.client.ResponseNotReady,
+                        http.client.BadStatusLine)
 
 # Always retry when an apiclient.errors.HttpError with one of these status
 # codes is raised.
@@ -64,10 +68,12 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 
 
 class Video:
-    def __init__(self, title, description, keywords, category, privacyStatus,
-                 selfDeclaredMadeForKids, embeddable, publicStatsViewable):
+    def __init__(self, title, file, description, keywords, category,
+                 privacyStatus, selfDeclaredMadeForKids, embeddable,
+                 publicStatsViewable):
 
         self.title = title
+        self.file = file
         self.description = description
         self.keywords = keywords
         self.category = category
@@ -83,27 +89,24 @@ class Video:
         if self.keywords:
             tags = self.keywords.split(',')
 
-        # args.title = format_title(args.file)
-        # args.description = read_description(args.description, args.file)
-
-        body = dict(
-            snippet=dict(
-                title=self.title,
-                description=self.description,
-                tags=tags,
-                categoryId=self.category
-            ),
-            status=dict(
-                privacyStatus=self.privacyStatus,
-                selfDeclaredMadeForKids=self.selfDeclaredMadeForKids,
-                embeddable=self.embeddable,
-                publicStatsViewable=self.publicStatsViewable,
-            )
-        )
+        body = {
+            'snippet': {
+                'categoryId': self.category,
+                'description': self.description,
+                'title': self.title,
+                'tags': tags,
+            },
+            'status': {
+                'privacyStatus': self.privacyStatus,
+                'selfDeclaredMadeForKids': self.selfDeclaredMadeForKids,
+                'embeddable': self.embeddable,
+                'publicStatsViewable': self.publicStatsViewable,
+            }
+        }
 
         # Call the API's videos.insert method to create and upload the video.
         insert_request = youtube.videos().insert(
-            part=','.join(list(body.keys())),
+            part='snippet,status',
             body=body,
             # The chunksize parameter specifies the size of each chunk of data, in
             # bytes, that will be uploaded at a time. Set a higher value for
@@ -116,17 +119,18 @@ class Video:
             # practice, but if you're using Python older than 2.6 or if you're
             # running on App Engine, you should set the chunksize to something like
             # 1024 * 1024 (1 megabyte).
-            media_body=MediaFileUpload(self.title, chunksize=-1, resumable=True)
+            media_body=MediaFileUpload(self.file, chunksize=-1, resumable=True)
         )
 
         self.response = resumable_upload(insert_request)
         return self.response
+        # return insert_request.execute()
 
     @classmethod
-    def from_title(cls, title):
+    def from_file(cls, file):
 
-        description = read_description('', title)
-
+        description = read_description('', file)
+        title = os.path.split(file)[1]
         keywords = ''
         category = '27'
         privacyStatus = 'unlisted'
@@ -135,6 +139,7 @@ class Video:
         publicStatsViewable = False
 
         return cls(title,
+                   file,
                    description,
                    keywords,
                    category,
@@ -142,15 +147,6 @@ class Video:
                    selfDeclaredMadeForKids,
                    embeddable,
                    publicStatsViewable)
-
-
-# Authorize the request and store authorization credentials.
-
-
-# def get_authenticated_service():
-#     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
-#     credentials = flow.run_console()
-#     return build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
 # This method implements an exponential backoff strategy to resume a
@@ -167,7 +163,8 @@ def resumable_upload(request):
             status, response = request.next_chunk()
             if response is not None:
                 if 'id' in response:
-                    print(('Video id "%s" was successfully uploaded.' % response['id']))
+                    print(('Video id "%s" was successfully uploaded.' %
+                           response['id']))
                 else:
                     exit('The upload failed with an unexpected response: %s' % response)
         except HttpError as e:
@@ -193,20 +190,24 @@ def resumable_upload(request):
     return response
 
 
-def upload_video(title):
-    video = Video.from_title(title)
+def upload_video(file):
+    video = Video.from_file(file)
 
     # youtube = get_authenticated_service()
-    youtube = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_VIDEO_FILE, SCOPES)
+    youtube = get_authenticated_service(
+        CLIENT_SECRETS_FILE, TOKEN_VIDEO_FILE, SCOPES)
 
     try:
         # response = initialize_upload(youtube, args)
         response = video.initialize_upload(youtube)
         return response, video
     except HttpError as e:
-        print(('An HTTP error %d occurred:\n%s' % (e.resp.status, e.content)))
-        return None, None
+        print(('upload_video - An HTTP error %d occurred:\n%s' %
+               (e.resp.status, e.content)))
+        return None, video
 
 
 if __name__ == '__main__':
-    response, video = upload_video("/mnt/nfs/media/Capture/aero_complexes_exo_p1_1.mkv")
+    video_file = "/mnt/nfs/media/Capture/2020-06-08_florian_everaere.mkv"
+    response, video = upload_video(video_file)
+

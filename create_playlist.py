@@ -30,10 +30,11 @@ def playlists_insert(dirpath, client, **kwargs):
                 "title": title,
                 "description": "",
                 "tags": [
-                    "sample playlist",
-                    "API call"
+                    'nsi',
+                    'informatique',
+                    'lycée'
                 ],
-                "defaultLanguage": "en"
+                "defaultLanguage": "fr"
             },
             "status": {
                 "privacyStatus": "private"
@@ -42,28 +43,20 @@ def playlists_insert(dirpath, client, **kwargs):
         **kwargs
     ).execute()
 
-    print(response)
     return response
 
 
 def create_playlist(directory):
-    # nom de la playlist
-    # if len(sys.argv) == 1:
-        # dirpath = os.getcwd()
-    # else:
-        # dirpath = sys.argv[1]
-
     # créer le client
     client = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_PLAYLIST_FILE, SCOPES)
 
-    # créer une playlist vide ?
+    # créer une playlist vide
     response = playlists_insert(directory,
                                 client,
                                 part='snippet,status',
                                 onBehalfOfContentOwner='')
 
-    id_playlist = response['id']
-    # uploader chaque vidéo en lui donnant la bonne id
+    id_playlist = response.get('id')
 
     return id_playlist
 
