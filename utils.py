@@ -18,6 +18,7 @@ SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl']
 TOKEN_PLAYLIST_FILE = '/home/quentin/gdrive/dev/python/boulot_utils/yt_upload/tokens/upload_playlist_token.pickle'
 TOKEN_VIDEO_FILE = '/home/quentin/gdrive/dev/python/boulot_utils/yt_upload/tokens/upload_video_token.pickle'
 
+
 def read_playlist_name(dirpath):
     # print("read_playlist_name - dirpath", dirpath)
     return dirpath.split('/')[-1].replace('_', ' ')

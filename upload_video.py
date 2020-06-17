@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 # std lib
-# import argparse
 import http.client
 import httplib2
 import os

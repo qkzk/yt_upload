@@ -1,9 +1,17 @@
 # Youtube Uploader
 
+
 Uploader un dossier complet et créer une playlist directement bien rangée
 avec mes paramètres par défaut
 
+## Usage
 
+1. cd dans le dossier contenant les vidéos. 
+    *   Le nom du dossier est celui de la playlist
+    *   Un fichier `description.txt` peut-être rempli, il servira de description
+        pour toutes les vidéos et la playlist
+    *   chaque vidéo (.mkv) du dossier sera uploadée
+2. Lancer le script .sh sans paramètre (un alias est crée)
 
 
 ## Paramètres à définir
@@ -28,8 +36,8 @@ avec mes paramètres par défaut
    - [x]   create playlist
    - [x]   upload whole folder
    - [x]   add each video to playlist
-- [ ]  organiser le tout dans un beau truc
-- [ ]  tester
+- [x]  organiser le tout dans un beau truc
+- [x]  tester
 
 ## Sources
 
