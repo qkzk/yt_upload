@@ -12,5 +12,5 @@ source venv/bin/activate
 cd $current_dir
 
 # start the script
-python3 $script_file
+python3 $script_file "$@"
 #python3 /home/quentin/gdrive/dev/python/boulot_utils/yt_upload/upload_folder.py

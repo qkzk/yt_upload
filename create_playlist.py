@@ -23,6 +23,7 @@ def playlists_insert(dirpath, client, **kwargs):
     # resource = build_resource(properties)
     kwargs = remove_empty_kwargs(**kwargs)
     title = read_playlist_name(dirpath)
+    print(title)
 
     response = client.playlists().insert(
         body={
@@ -32,9 +33,9 @@ def playlists_insert(dirpath, client, **kwargs):
                 "tags": [
                     'nsi',
                     'informatique',
-                    'lycée'
+                    'lycee'
                 ],
-                "defaultLanguage": "fr"
+                "defaultLanguage": "en"
             },
             "status": {
                 "privacyStatus": "private"
@@ -48,7 +49,9 @@ def playlists_insert(dirpath, client, **kwargs):
 
 def create_playlist(directory):
     # créer le client
-    client = get_authenticated_service(CLIENT_SECRETS_FILE, TOKEN_PLAYLIST_FILE, SCOPES)
+    client = get_authenticated_service(CLIENT_SECRETS_FILE,
+                                       TOKEN_PLAYLIST_FILE,
+                                       SCOPES)
 
     # créer une playlist vide
     response = playlists_insert(directory,
@@ -57,8 +60,11 @@ def create_playlist(directory):
                                 onBehalfOfContentOwner='')
 
     id_playlist = response.get('id')
+    if id_playlist is not None:
+        print("Playlist created successfully")
 
     return id_playlist
+
 
 if __name__ == '__main__':
     create_playlist(os.getcwd())
