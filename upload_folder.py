@@ -9,17 +9,10 @@ import argparse
 import os
 
 # own
+import color
 from add_to_playlist import add_to_playlist
 from create_playlist import create_playlist
 from upload_video import upload_video
-
-# import color
-import importlib.util
-spec = importlib.util.spec_from_file_location(
-    "color",
-    "/home/quentin/gdrive/dev/python/linux_utils/tests/colors.py")
-color = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(color)
 
 
 WELCOME_MSG = '''
