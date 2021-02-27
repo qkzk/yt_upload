@@ -146,7 +146,6 @@ def insert_videos_playlist(uploaded_video_ids, playlist_id):
 
 
 def upload_folder():
-    # print(WELCOME_MSG)
     print(banner)
     directory, playlist_id = parse_playlist_and_directory()
     video_dict = create_video_dict(directory)
