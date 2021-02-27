@@ -13,23 +13,9 @@ import color
 from add_to_playlist import add_to_playlist
 from create_playlist import create_playlist
 from upload_video import upload_video
+# from banner_color import banner
+from banner import banner
 
-
-WELCOME_MSG = '''
-\033[0;37;41m
-
-                              #                          #               ##
- ###  ##                      #            ### ###       #                #
-  #   #              #        #             #   #        #                #
-   # #    ###  #  ## ## #  ## ####   ##     #   #  ####  #  ###   ##    ###
-    #    #   # #   # #  #   # #   # #  #    #   #  #   # # #   #   ##  #  #
-    #    #   # #   # #  #   # #   # ####    #   #  #   # # #   # ## # #   #
-    #    #   # #   # #  #   # #  ## #       #  ##  #  ## # #   # #  # ##  #
-   ###    ###   #### ##  #### ###    ###     ##    ###   #  ###   ###  ####
-                                                   #                       
-                                                   ##                      
-\033[0m
-'''
 
 WARN_MSG = '''
 I will upload all .mkv files. They will be added to a playlist.
@@ -160,7 +146,8 @@ def insert_videos_playlist(uploaded_video_ids, playlist_id):
 
 
 def upload_folder():
-    print(WELCOME_MSG)
+    # print(WELCOME_MSG)
+    print(banner)
     directory, playlist_id = parse_playlist_and_directory()
     video_dict = create_video_dict(directory)
     check_user_want_to_continue(directory, video_dict)
